@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gerador de Jogos - Lotofácil</title>
+  <!-- Import Google Fonts and FontAwesome for icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-I0O3VYfklxED3ocx3ak1qsXeDYZRD5eT4CiZpFx7Z5HG/KKgV+8PN1CgBPBi5fv0mHd6m0mRMGurD67E2N4uTQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=dW-eluLgNkJSbHhaHYIwQDVXgpJKnqkjXwjI7n5ZGjMDcuw3WFE2QbxYkz8OBw1f5wcQRZWx3Ozqk03Omjoo4HLklEwQnH96pxG7AVte51z7jOWJeVyzBRcpy7uExT8O1Sx7QeYYE07f-rdrfOpz_dgYwF_2NZM0-6eiNWvkW-NeZNyj8k0FLlicSxakilaYjqTfIEdUQL6lj42nCAApmp9xo-sZAno_JwCk4NtheRiuY2ufzEE01SzoUGgfNX8z" charset="UTF-8"></script><style>
+    :root {
+      --primary: #0066b3;
+      --primary-dark: #004e8c;
+      --secondary: #ff6b00;
+      --secondary-dark: #e55d00;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --success: #2e7d32;
+      --danger: #c62828;
+      --warning: #ed6c02;
+      --muted: #6c757d;
+      --radius: 14px;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+      --transition: 0.25s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      color: var(--dark);
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header,
+    footer,
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    header {
+      padding: 22px;
+      margin: 0 0 18px;
+      position: relative;
+    }
+
+    .brand {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .brand i {
+      font-size: 32px;
+      color: var(--primary);
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: var(--muted);
+    }
+
+    .by {
+      position: absolute;
+      right: 18px;
+      top: 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #e3f2fd;
+      color: #0d47a1;
+      font-weight: 500;
+    }
+
+    .row {
+      display: grid;
+      gap: 16px;
+    }
+
+    @media (min-width: 900px) {
+      .row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card {
+      padding: 18px;
+    }
+
+    .card h2 {
+      font-size: 1.15rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 20px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn.secondary {
+      background: var(--secondary);
+    }
+
+    .btn.secondary:hover {
+      background: var(--secondary-dark);
+    }
+
+    .status,
+    .error,
+    .info {
+      padding: 14px;
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+
+    .status {
+      background: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      color: #1b5e20;
+    }
+
+    .error {
+      background: #ffebee;
+      border: 1px solid #ffcdd2;
+      color: #b71c1c;
+    }
+
+    .info {
+      background: #e3f2fd;
+      border: 1px solid #bbdefb;
+      color: #0d47a1;
+    }
+
+    .grid-nums {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(44px, 1fr));
+      gap: 10px;
+    }
+
+    @media (min-width: 520px) {
+      .grid-nums {
+        grid-template-columns: repeat(10, 1fr);
+      }
+    }
+
+    .ball {
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--light);
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .ball.most {
+      background: #2e7d32;
+      color: #fff;
+    }
+
+    .ball.least {
+      background: #c62828;
+      color: #fff;
+    }
+
+    .ball.rest {
+      background: #ffc107;
+      color: var(--dark);
+    }
+
+    .stats {
+      display: grid;
+      gap: 12px;
+    }
+
+    @media (min-width: 700px) {
+      .stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .stat {
+      background: #f7f9ff;
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid #eef2ff;
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .games {
+      display: grid;
+      gap: 18px;
+      margin-top: 14px;
+    }
+
+    @media (min-width: 700px) {
+      .games {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1000px) {
+      .games {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .game {
+      border: 1px solid #eef2ff;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .game h3 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--primary);
+      font-size: 1rem;
+      margin-bottom: 10px;
+      border-bottom: 1px dashed #eaeaea;
+      padding-bottom: 8px;
+    }
+
+    .bubble {
+      font-size: 0.8rem;
+      background: #f1f8ff;
+      border: 1px solid #dbeafe;
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: #0d47a1;
+    }
+
+    .nums {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      height: 38px;
+      width: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .chip.extra {
+      background: var(--secondary);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    footer {
+      margin: 18px 0 0;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border: 5px solid rgba(0, 102, 179, 0.2);
+      border-top: 5px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 10px auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="by"><i class="fa-solid fa-code"></i> Sistema por Renato Neves</div>
+      <div class="brand">
+        <i class="fa-solid fa-chart-line"></i>
+        <div>
+          <h1>Gerador de Jogos — Lotofácil</h1>
+          <div class="subtitle">Analisa os <strong>últimos 20 concursos reais</strong> e monta 11 jogos: 9 mais + 5 menos + 1 restante</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="toolbar" style="justify-content: space-between; align-items: center; margin-bottom: 12px">
+        <div class="pill"><i class="fa-solid fa-database"></i> Dados oficiais (via proxy)</div>
+        <div class="toolbar">
+          <button id="btnUpdate" class="btn"><i class="fa-solid fa-rotate"></i> Verificar/Atualizar</button>
+          <button id="btnGenerate" class="btn secondary"><i class="fa-solid fa-wand-magic-sparkles"></i> Gerar 11 Jogos</button>
+        </div>
+      </div>
+
+      <div id="status" class="status" role="status" aria-live="polite" style="display: none"></div>
+      <div id="error" class="error" role="alert" style="display: none"></div>
+      <div id="info" class="info" style="display: block">
+        <strong>Como funciona:</strong> busca o último concurso e mais 19 anteriores. Se houver sorteio novo, atualiza as estatísticas. Se a CEF falhar, usa o cache local.
+      </div>
+
+      <div id="loading" style="display: none">
+        <div class="spinner"></div>
+        <div class="muted" style="text-align: center">Consultando dados...</div>
+      </div>
+
+      <div class="row" style="margin-top: 10px">
+        <!-- Estatísticas -->
+        <div class="card">
+          <h2><i class="fa-solid fa-chart-bar"></i> Estatísticas dos últimos 20</h2>
+          <div class="stats">
+            <div class="stat">
+              <div class="label">9 mais sorteados</div>
+              <div id="most" class="muted">—</div>
+            </div>
+            <div class="stat">
+              <div class="label">5 menos sorteados</div>
+              <div id="least" class="muted">—</div>
+            </div>
+            <div class="stat">
+              <div class="label">Restantes (11)</div>
+              <div id="rest" class="muted">—</div>
+            </div>
+          </div>
+          <div class="label" style="margin-top: 12px">Mapa (1–25)</div>
+          <div id="grid" class="grid-nums" style="margin-top: 8px"></div>
+          <div id="lastUpdate" class="muted" style="margin-top: 10px"></div>
+        </div>
+
+        <!-- Jogos -->
+        <div class="card">
+          <h2><i class="fa-solid fa-ticket"></i> Jogos gerados</h2>
+          <div id="games" class="games"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div>Os dados são verificados em tempo real (via proxy). Se não houver novos concursos, as estatísticas permanecem as mesmas.</div>
+      <div class="muted" style="margin-top: 10px"><i class="fa-solid fa-circle-exclamation"></i> Auxiliar estatístico — não garante premiação. Jogue com responsabilidade.</div>
+    </footer>
+  </div>
+
+  <script>
+    // ===================== CONFIGURAÇÃO =====================
+    // Defina aqui a URL pública do seu Cloudflare Worker (proxy).
+    // Ex.: 'https://lotoproxy-xxxxxx.workers.dev/'
+    // Para testes rápidos sem configurar um proxy próprio, você pode utilizar
+    // um proxy público como allorigins.win. Defina abaixo a constante
+    // Defina aqui a URL do proxy a ser utilizado para contornar CORS. Para facilitar os
+    // testes on‑line, foi configurado um proxy público oferecido por corsproxy.io.
+    // Essa URL antepõe o endereço de destino e adiciona os cabeçalhos CORS na resposta.
+    // Em produção, recomenda‑se usar um proxy próprio (por exemplo, um Worker da Cloudflare)
+    // para garantir mais estabilidade e controle sobre limites de requisições.
+    const PROXY_URL = 'https://corsproxy.io/?';
+
+    // Endpoints da API de resultados das loterias, mantida por Gustavo Alves e
+    // hospedada no Heroku. Esses endpoints já expõem os dados das loterias
+    // (megasena, lotofacil, quina, etc.) em formato JSON. Como a API original
+    // da Caixa possui restrições de CORS, utilizamos o proxy acima para obter
+    // os dados com segurança diretamente do navegador.
+    // Último concurso da Lotofácil
+    const CEF_LAST_URL = 'https://loteriascaixa-api.herokuapp.com/api/lotofacil/latest';
+    // Consulta um concurso específico da Lotofácil, substituindo N pelo número do concurso
+    const CEF_ONE_URL = (n) => `https://loteriascaixa-api.herokuapp.com/api/lotofacil/${n}`;
+
+    // Chaves para localStorage
+    const LS_DATA_KEY = 'lf_data_20';
+    const LS_TS_KEY = 'lf_ts';
+
+    // ===================== Seletores DOM =====================
+    const $status = document.getElementById('status');
+    const $error = document.getElementById('error');
+    const $info = document.getElementById('info');
+    const $loading = document.getElementById('loading');
+    const $most = document.getElementById('most');
+    const $least = document.getElementById('least');
+    const $rest = document.getElementById('rest');
+    const $grid = document.getElementById('grid');
+    const $games = document.getElementById('games');
+    const $lastUpdate = document.getElementById('lastUpdate');
+    const $btnUpdate = document.getElementById('btnUpdate');
+    const $btnGenerate = document.getElementById('btnGenerate');
+
+    // ===================== Estado =====================
+    let draws = []; // lista com os últimos 20 concursos normalizados
+    let top9 = [];
+    let bottom5 = [];
+    let remaining11 = [];
+
+    // ===================== Helpers de UI =====================
+    function show(el, visible = true) {
+      el.style.display = visible ? 'block' : 'none';
+    }
+
+    function setStatus(msg) {
+      $status.textContent = msg;
+      show($status, true);
+      show($error, false);
+    }
+
+    function setError(msg) {
+      $error.textContent = msg;
+      show($error, true);
+      show($status, false);
+    }
+
+    function clearInfo() {
+      show($info, false);
+    }
+
+    function formatList(arr) {
+      return arr
+        .slice()
+        .sort((a, b) => a - b)
+        .join(', ');
+    }
+
+    function nowBR() {
+      return new Date().toLocaleString('pt-BR');
+    }
+
+    function renderGrid() {
+      $grid.innerHTML = '';
+      const setMost = new Set(top9);
+      const setLeast = new Set(bottom5);
+      const setRest = new Set(remaining11);
+      for (let i = 1; i <= 25; i++) {
+        const div = document.createElement('div');
+        div.className = 'ball';
+        if (setMost.has(i)) div.classList.add('most');
+        else if (setLeast.has(i)) div.classList.add('least');
+        else if (setRest.has(i)) div.classList.add('rest');
+        div.textContent = i;
+        $grid.appendChild(div);
+      }
+    }
+
+    function renderStats() {
+      $most.textContent = top9.length ? formatList(top9) : '—';
+      $least.textContent = bottom5.length ? formatList(bottom5) : '—';
+      $rest.textContent = remaining11.length ? formatList(remaining11) : '—';
+      renderGrid();
+    }
+
+    function renderGames() {
+      $games.innerHTML = '';
+      if (!top9.length || !bottom5.length || !remaining11.length) {
+        setError('Busque/atualize os dados antes de gerar os jogos.');
+        return;
+      }
+      remaining11.forEach((extra, i) => {
+        const card = document.createElement('div');
+        card.className = 'game';
+        const h3 = document.createElement('h3');
+        h3.innerHTML = `<span><i class="fa-solid fa-ticket"></i> Jogo ${i + 1}</span><span class="bubble">+${extra}</span>`;
+        const numBox = document.createElement('div');
+        numBox.className = 'nums';
+        const numbers = [...top9, ...bottom5, extra].sort((a, b) => a - b);
+        numbers.forEach((n) => {
+          const c = document.createElement('div');
+          c.className = 'chip' + (n === extra ? ' extra' : '');
+          c.textContent = n;
+          numBox.appendChild(c);
+        });
+        card.appendChild(h3);
+        card.appendChild(numBox);
+        $games.appendChild(card);
+      });
+    }
+
+    // ===================== Lógica principal =====================
+    /**
+     * Normaliza a estrutura de resposta da CEF para nosso formato interno.
+     * A CEF retorna algo como:
+     * {
+     *   numero: 2950,
+     *   dataApuracao: "02/09/2025",
+     *   listaDezenas: ["01","02",...]
+     * }
+     */
+    function normalizeCEF(json) {
+      // A API da Caixa (servicebus2) usa campos "numero", "dataApuracao" e "listaDezenas".
+      // A API alternativa (loteriascaixa-api.herokuapp.com) usa "concurso", "data" e "dezenas".
+      // Esta função normaliza ambos os formatos para uma estrutura comum.
+      const numero = json.numero ?? json.concurso ?? json.numeroConcurso;
+      const dataApuracao = json.dataApuracao ?? json.data ?? json.dataApuracao;
+      // Seleciona a lista de dezenas de acordo com o formato disponível: listaDezenas (CEF)
+      // ou dezenas (API alternativa). Caso contrário, tenta usar dezenasOrdemSorteio.
+      const dezenasLista = json.listaDezenas || json.dezenas || json.dezenasOrdemSorteio || [];
+      const dezenas = dezenasLista.map((d) => parseInt(d, 10));
+      return {
+        numero,
+        dataApuracao,
+        dezenas,
+      };
+    }
+
+    /**
+     * Realiza um fetch via proxy (evitando CORS) e retorna JSON.
+     */
+    async function proxyFetchJSON(url) {
+      if (!PROXY_URL) throw new Error('Proxy não configurado');
+      // Para o proxy público corsproxy.io, a URL de destino deve ser passada logo após o ponto de interrogação.
+      // Por exemplo: https://corsproxy.io/?https://exemplo.com
+      // Usamos encodeURIComponent para garantir que caracteres especiais sejam escapados corretamente.
+      const proxiedUrl = PROXY_URL + encodeURIComponent(url);
+      const res = await fetch(proxiedUrl, { cache: 'no-store' });
+      if (!res.ok) {
+        throw new Error(`Erro HTTP ${res.status}`);
+      }
+      return res.json();
+    }
+
+    async function fetchLatest() {
+      const json = await proxyFetchJSON(CEF_LAST_URL);
+      return normalizeCEF(json);
+    }
+
+    async function fetchByNumber(num) {
+      const json = await proxyFetchJSON(CEF_ONE_URL(num));
+      return normalizeCEF(json);
+    }
+
+    async function fetchLast20() {
+      const latest = await fetchLatest();
+      const list = [latest];
+      const promises = [];
+      for (let i = 1; i < 20; i++) {
+        promises.push(fetchByNumber(latest.numero - i));
+      }
+      const prev = await Promise.all(promises);
+      const all = [...list, ...prev].sort((a, b) => b.numero - a.numero);
+      return all;
+    }
+
+    function saveCache(list) {
+      localStorage.setItem(LS_DATA_KEY, JSON.stringify(list));
+      localStorage.setItem(LS_TS_KEY, Date.now().toString());
+    }
+
+    function loadCache() {
+      try {
+        const raw = localStorage.getItem(LS_DATA_KEY);
+        const ts = localStorage.getItem(LS_TS_KEY);
+        if (!raw || !ts) return null;
+        const list = JSON.parse(raw);
+        return { list, ts: parseInt(ts, 10) };
+      } catch (ex) {
+        return null;
+      }
+    }
+
+    function computeStats(list) {
+      // Frequência das dezenas de 1 a 25
+      const freq = Array(26).fill(0);
+      list.forEach((draw) => {
+        draw.dezenas.forEach((n) => {
+          if (n >= 1 && n <= 25) freq[n]++;
+        });
+      });
+      const arr = [];
+      for (let n = 1; n <= 25; n++) {
+        arr.push({ number: n, frequency: freq[n] });
+      }
+      // Ordena por frequência decrescente e, em caso de empate, número ascendente
+      arr.sort((a, b) => (b.frequency - a.frequency) || (a.number - b.number));
+      const top = [];
+      for (const item of arr) {
+        if (top.length < 9) top.push(item.number);
+      }
+      const bottom = [];
+      for (let i = arr.length - 1; i >= 0 && bottom.length < 5; i--) {
+        const n = arr[i].number;
+        if (!top.includes(n)) bottom.push(n);
+      }
+      const rest = [];
+      for (let n = 1; n <= 25; n++) {
+        if (!top.includes(n) && !bottom.includes(n)) rest.push(n);
+      }
+      return { top9: top, bottom5: bottom, remaining11: rest };
+    }
+
+    /**
+     * Gera 20 concursos de demonstração para testes offline.
+     * Cada concurso contém 15 dezenas únicas entre 1 e 25.
+     */
+    function generateOfflineDraws() {
+      const list = [];
+      for (let i = 0; i < 20; i++) {
+        const selected = [];
+        // seleciona 15 dezenas únicas
+        while (selected.length < 15) {
+          const n = Math.floor(Math.random() * 25) + 1;
+          if (!selected.includes(n)) selected.push(n);
+        }
+        selected.sort((a, b) => a - b);
+        list.push({
+          numero: 1000 - i,
+          dataApuracao: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'),
+          dezenas: selected,
+        });
+      }
+      return list;
+    }
+
+    async function updateData() {
+      clearInfo();
+      show($loading, true);
+      show($games, false);
+      try {
+        const fresh = await fetchLast20();
+        const cached = loadCache();
+        const changed = !cached || (cached.list?.[0]?.numero !== fresh?.[0]?.numero);
+        draws = fresh;
+        saveCache(draws);
+        const { top9: t9, bottom5: b5, remaining11: r11 } = computeStats(draws);
+        top9 = t9;
+        bottom5 = b5;
+        remaining11 = r11;
+        renderStats();
+        $lastUpdate.textContent = `Última verificação: ${nowBR()} — Último concurso: ${draws[0].numero} (${draws[0].dataApuracao})`;
+        setStatus(changed ? 'Novos dados encontrados e processados!' : 'Sem novos concursos. Mantendo estatísticas atuais.');
+      } catch (err) {
+        console.error(err);
+        const cached = loadCache();
+        if (cached) {
+          draws = cached.list;
+          const { top9: t9, bottom5: b5, remaining11: r11 } = computeStats(draws);
+          top9 = t9;
+          bottom5 = b5;
+          remaining11 = r11;
+          renderStats();
+          const ageHours = Math.floor((Date.now() - cached.ts) / 36e5);
+          $lastUpdate.textContent = `Usando cache local de ${new Date(cached.ts).toLocaleString('pt-BR')} (idade ~${ageHours}h).`;
+          setStatus('Não foi possível consultar a CEF agora. Mantendo cache local.');
+        } else {
+          // Se não houver dados locais, usa modo de demonstração com jogos aleatórios
+          console.warn('Falling back to offline demo data due to error:', err);
+          draws = generateOfflineDraws();
+          saveCache(draws);
+          const { top9: t9, bottom5: b5, remaining11: r11 } = computeStats(draws);
+          top9 = t9;
+          bottom5 = b5;
+          remaining11 = r11;
+          renderStats();
+          $lastUpdate.textContent = 'Modo demonstração offline';
+          setStatus('Modo demonstração: dados gerados aleatoriamente para teste.');
+        }
+      } finally {
+        show($loading, false);
+      }
+    }
+
+    function generateGames() {
+      renderGames();
+      show($games, true);
+    }
+
+    // Monta grid inicial 1..25
+    (function initGrid() {
+      for (let i = 1; i <= 25; i++) {
+        const b = document.createElement('div');
+        b.className = 'ball';
+        b.textContent = i;
+        $grid.appendChild(b);
+      }
+    })();
+
+    // Ao carregar, tenta usar cache local se tiver menos de 24h
+    (function boot() {
+      const cached = loadCache();
+      if (cached) {
+        const ageHours = Math.floor((Date.now() - cached.ts) / 36e5);
+        draws = cached.list;
+        const { top9: t9, bottom5: b5, remaining11: r11 } = computeStats(draws);
+        top9 = t9;
+        bottom5 = b5;
+        remaining11 = r11;
+        renderStats();
+        $lastUpdate.textContent = `Cache local de ${new Date(cached.ts).toLocaleString('pt-BR')} (idade ~${ageHours}h). Clique em Atualizar para consultar a CEF.`;
+        show($info, false);
+        show($status, true);
+        $status.textContent = 'Usando cache local. Para atualizar, clique em Verificar/Atualizar.';
+      }
+    })();
+
+    // Vincula eventos aos botões
+    $btnUpdate.addEventListener('click', updateData);
+    $btnGenerate.addEventListener('click', generateGames);
+  </script>
+</body>
+</html>
