@@ -7,7 +7,7 @@
   <!-- Import Google Fonts and FontAwesome for icons -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-I0O3VYfklxED3ocx3ak1qsXeDYZRD5eT4CiZpFx7Z5HG/KKgV+8PN1CgBPBi5fv0mHd6m0mRMGurD67E2N4uTQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=dW-eluLgNkJSbHhaHYIwQDVXgpJKnqkjXwjI7n5ZGjMDcuw3WFE2QbxYkz8OBw1f5wcQRZWx3Ozqk03Omjoo4HLklEwQnH96pxG7AVte51z7jOWJeVyzBRcpy7uExT8O1Sx7QeYYE07f-rdrfOpz_dgYwF_2NZM0-6eiNWvkW-NeZNyj8k0FLlicSxakilaYjqTfIEdUQL6lj42nCAApmp9xo-sZAno_JwCk4NtheRiuY2ufzEE01SzoUGgfNX8z" charset="UTF-8"></script><style>
+  <style>
     :root {
       --primary: #0066b3;
       --primary-dark: #004e8c;
@@ -370,7 +370,6 @@
       </div>
 
       <div class="row" style="margin-top: 10px">
-        <!-- Estatísticas -->
         <div class="card">
           <h2><i class="fa-solid fa-chart-bar"></i> Estatísticas dos últimos 20</h2>
           <div class="stats">
@@ -392,7 +391,6 @@
           <div id="lastUpdate" class="muted" style="margin-top: 10px"></div>
         </div>
 
-        <!-- Jogos -->
         <div class="card">
           <h2><i class="fa-solid fa-ticket"></i> Jogos gerados</h2>
           <div id="games" class="games"></div>
@@ -407,33 +405,12 @@
   </div>
 
   <script>
-    // ===================== CONFIGURAÇÃO =====================
-    // Defina aqui a URL pública do seu Cloudflare Worker (proxy).
-    // Ex.: 'https://lotoproxy-xxxxxx.workers.dev/'
-    // Para testes rápidos sem configurar um proxy próprio, você pode utilizar
-    // um proxy público como allorigins.win. Defina abaixo a constante
-    // Defina aqui a URL do proxy a ser utilizado para contornar CORS. Para facilitar os
-    // testes on‑line, foi configurado um proxy público oferecido por corsproxy.io.
-    // Essa URL antepõe o endereço de destino e adiciona os cabeçalhos CORS na resposta.
-    // Em produção, recomenda‑se usar um proxy próprio (por exemplo, um Worker da Cloudflare)
-    // para garantir mais estabilidade e controle sobre limites de requisições.
     const PROXY_URL = 'https://corsproxy.io/?';
-
-    // Endpoints da API de resultados das loterias, mantida por Gustavo Alves e
-    // hospedada no Heroku. Esses endpoints já expõem os dados das loterias
-    // (megasena, lotofacil, quina, etc.) em formato JSON. Como a API original
-    // da Caixa possui restrições de CORS, utilizamos o proxy acima para obter
-    // os dados com segurança diretamente do navegador.
-    // Último concurso da Lotofácil
     const CEF_LAST_URL = 'https://loteriascaixa-api.herokuapp.com/api/lotofacil/latest';
-    // Consulta um concurso específico da Lotofácil, substituindo N pelo número do concurso
     const CEF_ONE_URL = (n) => `https://loteriascaixa-api.herokuapp.com/api/lotofacil/${n}`;
-
-    // Chaves para localStorage
     const LS_DATA_KEY = 'lf_data_20';
     const LS_TS_KEY = 'lf_ts';
 
-    // ===================== Seletores DOM =====================
     const $status = document.getElementById('status');
     const $error = document.getElementById('error');
     const $info = document.getElementById('info');
@@ -447,13 +424,11 @@
     const $btnUpdate = document.getElementById('btnUpdate');
     const $btnGenerate = document.getElementById('btnGenerate');
 
-    // ===================== Estado =====================
-    let draws = []; // lista com os últimos 20 concursos normalizados
+    let draws = [];
     let top9 = [];
     let bottom5 = [];
     let remaining11 = [];
 
-    // ===================== Helpers de UI =====================
     function show(el, visible = true) {
       el.style.display = visible ? 'block' : 'none';
     }
@@ -475,10 +450,7 @@
     }
 
     function formatList(arr) {
-      return arr
-        .slice()
-        .sort((a, b) => a - b)
-        .join(', ');
+      return arr.slice().sort((a, b) => a - b).join(', ');
     }
 
     function nowBR() {
@@ -534,46 +506,19 @@
       });
     }
 
-    // ===================== Lógica principal =====================
-    /**
-     * Normaliza a estrutura de resposta da CEF para nosso formato interno.
-     * A CEF retorna algo como:
-     * {
-     *   numero: 2950,
-     *   dataApuracao: "02/09/2025",
-     *   listaDezenas: ["01","02",...]
-     * }
-     */
     function normalizeCEF(json) {
-      // A API da Caixa (servicebus2) usa campos "numero", "dataApuracao" e "listaDezenas".
-      // A API alternativa (loteriascaixa-api.herokuapp.com) usa "concurso", "data" e "dezenas".
-      // Esta função normaliza ambos os formatos para uma estrutura comum.
       const numero = json.numero ?? json.concurso ?? json.numeroConcurso;
-      const dataApuracao = json.dataApuracao ?? json.data ?? json.dataApuracao;
-      // Seleciona a lista de dezenas de acordo com o formato disponível: listaDezenas (CEF)
-      // ou dezenas (API alternativa). Caso contrário, tenta usar dezenasOrdemSorteio.
+      const dataApuracao = json.dataApuracao ?? json.data ?? '';
       const dezenasLista = json.listaDezenas || json.dezenas || json.dezenasOrdemSorteio || [];
       const dezenas = dezenasLista.map((d) => parseInt(d, 10));
-      return {
-        numero,
-        dataApuracao,
-        dezenas,
-      };
+      return { numero, dataApuracao, dezenas };
     }
 
-    /**
-     * Realiza um fetch via proxy (evitando CORS) e retorna JSON.
-     */
     async function proxyFetchJSON(url) {
       if (!PROXY_URL) throw new Error('Proxy não configurado');
-      // Para o proxy público corsproxy.io, a URL de destino deve ser passada logo após o ponto de interrogação.
-      // Por exemplo: https://corsproxy.io/?https://exemplo.com
-      // Usamos encodeURIComponent para garantir que caracteres especiais sejam escapados corretamente.
       const proxiedUrl = PROXY_URL + encodeURIComponent(url);
       const res = await fetch(proxiedUrl, { cache: 'no-store' });
-      if (!res.ok) {
-        throw new Error(`Erro HTTP ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`Erro HTTP ${res.status}`);
       return res.json();
     }
 
@@ -591,12 +536,9 @@
       const latest = await fetchLatest();
       const list = [latest];
       const promises = [];
-      for (let i = 1; i < 20; i++) {
-        promises.push(fetchByNumber(latest.numero - i));
-      }
+      for (let i = 1; i < 20; i++) promises.push(fetchByNumber(latest.numero - i));
       const prev = await Promise.all(promises);
-      const all = [...list, ...prev].sort((a, b) => b.numero - a.numero);
-      return all;
+      return [...list, ...prev].sort((a, b) => b.numero - a.numero);
     }
 
     function saveCache(list) {
@@ -609,15 +551,13 @@
         const raw = localStorage.getItem(LS_DATA_KEY);
         const ts = localStorage.getItem(LS_TS_KEY);
         if (!raw || !ts) return null;
-        const list = JSON.parse(raw);
-        return { list, ts: parseInt(ts, 10) };
+        return { list: JSON.parse(raw), ts: parseInt(ts, 10) };
       } catch (ex) {
         return null;
       }
     }
 
     function computeStats(list) {
-      // Frequência das dezenas de 1 a 25
       const freq = Array(26).fill(0);
       list.forEach((draw) => {
         draw.dezenas.forEach((n) => {
@@ -625,15 +565,10 @@
         });
       });
       const arr = [];
-      for (let n = 1; n <= 25; n++) {
-        arr.push({ number: n, frequency: freq[n] });
-      }
-      // Ordena por frequência decrescente e, em caso de empate, número ascendente
+      for (let n = 1; n <= 25; n++) arr.push({ number: n, frequency: freq[n] });
       arr.sort((a, b) => (b.frequency - a.frequency) || (a.number - b.number));
       const top = [];
-      for (const item of arr) {
-        if (top.length < 9) top.push(item.number);
-      }
+      for (const item of arr) if (top.length < 9) top.push(item.number);
       const bottom = [];
       for (let i = arr.length - 1; i >= 0 && bottom.length < 5; i--) {
         const n = arr[i].number;
@@ -646,15 +581,10 @@
       return { top9: top, bottom5: bottom, remaining11: rest };
     }
 
-    /**
-     * Gera 20 concursos de demonstração para testes offline.
-     * Cada concurso contém 15 dezenas únicas entre 1 e 25.
-     */
     function generateOfflineDraws() {
       const list = [];
       for (let i = 0; i < 20; i++) {
         const selected = [];
-        // seleciona 15 dezenas únicas
         while (selected.length < 15) {
           const n = Math.floor(Math.random() * 25) + 1;
           if (!selected.includes(n)) selected.push(n);
@@ -679,10 +609,10 @@
         const changed = !cached || (cached.list?.[0]?.numero !== fresh?.[0]?.numero);
         draws = fresh;
         saveCache(draws);
-        const { top9: t9, bottom5: b5, remaining11: r11 } = computeStats(draws);
-        top9 = t9;
-        bottom5 = b5;
-        remaining11 = r11;
+        const stats = computeStats(draws);
+        top9 = stats.top9;
+        bottom5 = stats.bottom5;
+        remaining11 = stats.remaining11;
         renderStats();
         $lastUpdate.textContent = `Última verificação: ${nowBR()} — Último concurso: ${draws[0].numero} (${draws[0].dataApuracao})`;
         setStatus(changed ? 'Novos dados encontrados e processados!' : 'Sem novos concursos. Mantendo estatísticas atuais.');
@@ -691,23 +621,21 @@
         const cached = loadCache();
         if (cached) {
           draws = cached.list;
-          const { top9: t9, bottom5: b5, remaining11: r11 } = computeStats(draws);
-          top9 = t9;
-          bottom5 = b5;
-          remaining11 = r11;
+          const stats = computeStats(draws);
+          top9 = stats.top9;
+          bottom5 = stats.bottom5;
+          remaining11 = stats.remaining11;
           renderStats();
           const ageHours = Math.floor((Date.now() - cached.ts) / 36e5);
           $lastUpdate.textContent = `Usando cache local de ${new Date(cached.ts).toLocaleString('pt-BR')} (idade ~${ageHours}h).`;
           setStatus('Não foi possível consultar a CEF agora. Mantendo cache local.');
         } else {
-          // Se não houver dados locais, usa modo de demonstração com jogos aleatórios
-          console.warn('Falling back to offline demo data due to error:', err);
           draws = generateOfflineDraws();
           saveCache(draws);
-          const { top9: t9, bottom5: b5, remaining11: r11 } = computeStats(draws);
-          top9 = t9;
-          bottom5 = b5;
-          remaining11 = r11;
+          const stats = computeStats(draws);
+          top9 = stats.top9;
+          bottom5 = stats.bottom5;
+          remaining11 = stats.remaining11;
           renderStats();
           $lastUpdate.textContent = 'Modo demonstração offline';
           setStatus('Modo demonstração: dados gerados aleatoriamente para teste.');
@@ -722,7 +650,6 @@
       show($games, true);
     }
 
-    // Monta grid inicial 1..25
     (function initGrid() {
       for (let i = 1; i <= 25; i++) {
         const b = document.createElement('div');
@@ -732,16 +659,15 @@
       }
     })();
 
-    // Ao carregar, tenta usar cache local se tiver menos de 24h
     (function boot() {
       const cached = loadCache();
       if (cached) {
         const ageHours = Math.floor((Date.now() - cached.ts) / 36e5);
         draws = cached.list;
-        const { top9: t9, bottom5: b5, remaining11: r11 } = computeStats(draws);
-        top9 = t9;
-        bottom5 = b5;
-        remaining11 = r11;
+        const stats = computeStats(draws);
+        top9 = stats.top9;
+        bottom5 = stats.bottom5;
+        remaining11 = stats.remaining11;
         renderStats();
         $lastUpdate.textContent = `Cache local de ${new Date(cached.ts).toLocaleString('pt-BR')} (idade ~${ageHours}h). Clique em Atualizar para consultar a CEF.`;
         show($info, false);
@@ -750,7 +676,6 @@
       }
     })();
 
-    // Vincula eventos aos botões
     $btnUpdate.addEventListener('click', updateData);
     $btnGenerate.addEventListener('click', generateGames);
   </script>
